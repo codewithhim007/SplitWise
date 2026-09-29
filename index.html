@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="A simple and beautiful trip expense splitter.">
+  <title>TripSplit — Split trip expenses simply</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#">
+        <span class="brand-icon">₹</span>
+        <span class="brand-copy"><strong>TripSplit</strong><small>Travel. Spend. Settle.</small></span>
+      </a>
+      <div class="top-actions">
+        <button class="ghost-btn" id="saveBtn">↥ <span>Export</span></button>
+        <label class="ghost-btn file-btn" for="loadInput">↧ <span>Import</span></label>
+        <input id="loadInput" type="file" accept=".json,application/json" hidden>
+        <button class="primary-btn compact" id="newTripBtn">+ New trip</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero">
+        <div class="hero-copy">
+          <div class="pill">✦ SIMPLE GROUP EXPENSES</div>
+          <h1>Enjoy the trip.<br><em>We'll handle the math.</em></h1>
+          <p>Track who paid, split expenses your way, and see exactly who needs to pay whom.</p>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="sun"></div>
+          <div class="mountain mountain-a"></div>
+          <div class="mountain mountain-b"></div>
+          <div class="road"></div>
+          <div class="car">●</div>
+          <div class="floating-card card-a">₹ 2,450</div>
+          <div class="floating-card card-b">✓ Settled</div>
+        </div>
+      </section>
+
+      <div id="message" class="message" hidden></div>
+
+      <section class="workspace">
+        <aside class="sidebar">
+          <div class="side-step active" data-target="peopleSection">
+            <span>1</span><div><strong>People</strong><small>Who's on the trip?</small></div>
+          </div>
+          <div class="side-line"></div>
+          <div class="side-step" data-target="expenseSection">
+            <span>2</span><div><strong>Expenses</strong><small>Add what you spent</small></div>
+          </div>
+          <div class="side-line"></div>
+          <div class="side-step" data-target="resultSection">
+            <span>3</span><div><strong>Settle up</strong><small>See the final split</small></div>
+          </div>
+          <div class="mini-tip">
+            <span>💡</span>
+            <div><strong>Don't worry about the maths.</strong><small>TripSplit keeps track of it for you.</small></div>
+          </div>
+        </aside>
+
+        <div class="content">
+          <section class="panel" id="peopleSection">
+            <div class="panel-head">
+              <div>
+                <span class="section-kicker">STEP 01</span>
+                <h2>Add your people</h2>
+              </div>
+              <span class="count-badge" id="peopleCount">0 people</span>
+            </div>
+            <form id="personForm" class="add-person">
+              <div class="input-wrap"><span>⌕</span><input id="personName" type="text" maxlength="50" placeholder="Enter a name" autocomplete="off"></div>
+              <button class="primary-btn" type="submit">Add person</button>
+            </form>
+            <div id="peopleList" class="people-grid empty-state">Your group will appear here.</div>
+          </section>
+
+          <section class="panel" id="expenseSection">
+            <div class="panel-head">
+              <div>
+                <span class="section-kicker">STEP 02</span>
+                <h2>Add an expense</h2>
+              </div>
+            </div>
+
+            <div id="expenseEmpty" class="soft-empty"><span>👥</span><div><strong>First, add at least 2 people.</strong><small>Then you can start adding trip expenses.</small></div></div>
+
+            <form id="expenseForm" hidden>
+              <div class="expense-top">
+                <div class="field description-field">
+                  <label>What did you spend on?</label>
+                  <input id="expenseDescription" type="text" maxlength="80" placeholder="Dinner, hotel, cab, tickets...">
+                </div>
+                <div class="field amount-field">
+                  <label>Amount</label>
+                  <div class="amount-input"><span>₹</span><input id="expenseAmount" type="number" min="0.01" step="0.01" placeholder="0.00"></div>
+                </div>
+              </div>
+              <div class="expense-meta">
+                <div class="field"><label>Date</label><input id="expenseDate" type="date"></div>
+                <div class="field"><label>Payment method</label><select id="paymentMethod"><option>UPI</option><option>Cash</option><option>Credit card</option><option>Debit card</option><option>Bank transfer</option><option>Other</option></select></div>
+              </div>
+
+              <div class="split-section">
+                <div class="sub-head">
+                  <div><h3>Who paid?</h3><small>You can choose more than one person.</small></div>
+                  <span id="payerTotal" class="total-pill">₹0.00</span>
+                </div>
+                <div id="payerRows" class="allocation-list"></div>
+              </div>
+
+              <div class="split-section">
+                <div class="sub-head split-head">
+                  <div><h3>Who should share it?</h3><small>Choose the people who benefited.</small></div>
+                  <div class="segmented" id="splitMode"><button type="button" class="active" data-mode="equal">Equal</button><button type="button" data-mode="custom">Custom</button></div>
+                </div>
+                <div class="quick-actions"><button type="button" class="link-btn" id="selectAllBtn">Select everyone</button><button type="button" class="link-btn" id="clearAllBtn">Clear</button></div>
+                <div id="splitRows" class="allocation-list"></div>
+                <div class="allocation-total"><span>Share allocated</span><strong id="splitTotal">₹0.00</strong></div>
+              </div>
+
+              <div class="form-bottom">
+                <button class="primary-btn wide" type="submit">Add expense <span>→</span></button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel" id="expensesSection">
+            <div class="panel-head">
+              <div><span class="section-kicker">YOUR TRIP</span><h2>Expenses</h2></div>
+              <span id="expenseCount" class="count-badge">0 expenses</span>
+            </div>
+            <div id="expensesList" class="expense-list empty-state">Your expenses will appear here.</div>
+            <div id="expenseSummary" class="summary-strip" hidden></div>
+          </section>
+
+          <section class="panel result-panel" id="resultSection">
+            <div class="panel-head">
+              <div><span class="section-kicker">STEP 03</span><h2>Final settlement</h2></div>
+              <span class="magic-badge">✦ Calculated</span>
+            </div>
+            <div id="resultEmpty" class="soft-empty"><span>✨</span><div><strong>Your final settlement will appear here.</strong><small>Add your expenses and we'll work out the rest.</small></div></div>
+
+            <div id="resultContent" hidden>
+              <div class="total-grid" id="totalGrid"></div>
+              <div class="settlement-title"><div><h3>Who pays whom?</h3><small>Only the payments needed to settle the trip are shown.</small></div></div>
+              <div id="settlementList" class="settlement-list"></div>
+              <div class="balance-table-wrap">
+                <h3>Everyone's balance</h3>
+                <div class="balance-table-scroll"><table class="balance-table"><thead><tr><th>Person</th><th>Paid</th><th>Share</th><th>Balance</th></tr></thead><tbody id="balanceBody"></tbody></table></div>
+              </div>
+              <div class="success-box" id="settledBox" hidden><span>✓</span><div><strong>You're all settled!</strong><small>No payments are needed between the group.</small></div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <footer>TripSplit · Your data stays in your browser.</footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
